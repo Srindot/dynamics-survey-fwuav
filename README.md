@@ -18,3 +18,5 @@ The following research paper's formulation was used to implement to analyse the 
 
 - ### An Improved Quasi-Steady Model Capable of Calculating Flexible Deformation for Bird-Sized Flapping Wings (2024) 
 #### Authors: Tianyou Mao, Chuangqiang Guo, Bosong Duan, et al. 
+
+---
