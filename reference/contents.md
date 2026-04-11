@@ -14,3 +14,17 @@
     }
     ```
 
+- **[Small Unmanned Aircraft: Theory and Practice, 2nd Edition](Small_Unmanned_Aircraft_Theory_and_Practice_2nd_Ed_2025/Beard_2025.pdf)** (2025) - R. Beard, T. McLain | [📄 Markdown Notes](Small_Unmanned_Aircraft_Theory_and_Practice_2nd_Ed_2025/Beard_2025.md)
+
+    **Abstract:** Abstract extraction failed. Please read the PDF.
+
+    **BibTeX:**
+    ```bibtex
+    @article{Beard_2025,
+      title={Small Unmanned Aircraft: Theory and Practice, 2nd Edition},
+      author={R. Beard, T. McLain},
+      year={2025},
+      url={Local File: uavbook.pdf}
+    }
+    ```
+
