@@ -93,7 +93,7 @@ def transform_rate(rate_in, pose_in):
 
     # No Rotation Check 
     if o < 1e-9:
-        return rate_in 
+        return rate_in.copy()
 
     # Temporary Variable 
     S =  np.sin(o/2)
