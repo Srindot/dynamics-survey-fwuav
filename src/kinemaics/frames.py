@@ -57,22 +57,22 @@ class Body_Frame:
         self.state = np.zeros(6)
 
         # Force  
-        self.force = np.zeros(3)
+        self.forces = np.zeros(3)
 
         # Moments 
-        self.moment = np.zeros(3)
+        self.moments = np.zeros(3)
 
         # Acceleration
         # Linear Accel(3) + Angular Accel(3)
         self.acc = np.zeros(6)
 
     # Push state 
-    def push_state(self, linear_vel, angular_rate):
-        self.state = np.concatenate([linear_vel, angular_rate])
+    def push_state(self, linear_vel, angular_rates):
+        self.state = np.concatenate([linear_vel, angular_rates])
 
-    def push_forces(self, force_in, moment_in):
-        self.force = force_in
-        self.moment = moment_in
+    def push_forces(self, forces_in, moments_in):
+        self.forces = forces_in
+        self.moments = moments_in
 
     def update_accelerations(self, linear_acceleration_in, angular_acceleration_in):
         self.acc = np.concatenate([ linear_acceleration_in, angular_acceleration_in ])
@@ -87,12 +87,12 @@ class Body_Frame:
         return self.state[3:6].copy()
 
     @property
-    def forces(self):
-        return self.force.copy()
+    def force(self):
+        return self.forces.copy()
 
     @property
-    def moments(self):
-        return self.moment.copy()
+    def moment(self):
+        return self.moments.copy()
 
     @property
     def linear_acceleration(self):
@@ -104,39 +104,34 @@ class Body_Frame:
 
 # Frame: Winghinge
 class Winghinge_Frame:
-    def __init__(self, actuation_system, side = "left"):
+    def __init__(self, side="left", actuation_system):
 
         # Side 
         self.side = side
-        self.sign = 1 if self.side == "left" else -1
+        sign = 1 if side == "left" else -1
 
         # Offset from the com for the hinge location 
-        self.offset_from_com = np.array([0.18097, self.sign * 0.01345, 0.01557])
+        self.offset_from_com = np.array([0.18097, sign * 0.01345, 0.01557])
         self.incidence_angle = np.radians(5.0)  
 
         # State  ( Vel(vx, vy, vz), Angular Rate(rx, ry, rz), Flapping_Angle, Flapping_Rate)
         self.state = np.zeros(8)
-
+       
         # Forces and Moments
-        self.force = np.zeros(3)
-        self.moment = np.zeros(3)
+        self.forces = np.zeros(3)
+        self.moments = np.zeros(3)
 
         # actution system instance  
         self.actuation_system = actuation_system
 
     def push_state(self, vel_in, rate_in):
+        flapping_angle = self.actuation_system.get_flap_angle()
+        flapping_rate = self.actuation_system.get_flap_rate()
+        self.state = np.concatenate([vel_in, rate_in, [ flapping_angle ], [ flapping_rate ]])
 
-       # Function call from actuation_system : returns a np.array
-       flapping_state = self.actuation_system.get_flapping_state()
-
-       # Update the state
-       self.state[0:3] = vel_in
-       self.state[3:6] = rate_in
-       self.state[6:8] = flapping_state
-
-    def push_forces(self, force_in, moment_in):
-        self.force = force_in
-        self.moment = moment_in
+    def push_forces(self, forces_in, moments_in):
+        self.forces = forces_in
+        self.moments = moments_in
 
     # Pull The State & Data 
     @property
@@ -152,12 +147,12 @@ class Winghinge_Frame:
         return self.state[6:8].copy()
 
     @property
-    def forces(self):
-        return self.force.copy()
+    def force(self):
+        return self.forces 
 
     @property
-    def moments(self):
-        return self.moment.copy()
+    def moment(self):
+        return self.moments
 
 # Frame: Wing_Strip
 class Wing_Strip:
@@ -185,11 +180,6 @@ class Wing_Strip:
         self.state[0:3] = vel_in
         self.state[3:6] = rate_in 
 
-    # Push the Forces & Moments
-    def push_forces(self, force_in, moment_in):
-        self.force = force_in   
-        self.moment= moment_in
-
     # Pull the State & Data
     @property
     def velocity(self):
@@ -212,47 +202,34 @@ class Tail_Frame:
 
     def __init__(self, actuation_system):
 
-        self.hinge = np.array([-0.3, 0.0, -0.1])
+        # Tail Hinge position from the BodyFrame Com
+        self.hinge = np.array([-0.20148, 0.00054, 0.02835])
 
+        # Tail COP position from the Body COM
         self.tail_cop_offset = np.array([-0.1, 0.0, 0.0])
-
+        
+        # State Vector ( velocity(vx, vy, vz), angular_rate(rx, ry, rz))
         self.state = np.zeros(6)
 
+        # Force Array
         self.force = np.zeros(3)
 
+        # Moment Array  
         self.moment = np.zeros(3)
-
+        
+        # Actuation System Instance Pass down
         self.actuation_system = actuation_system
         
+    # Push State & Data
+    def push_state(self, velocity_in, rate_in):
+        self.state[:3] = velocity_in
+        self.state[3:6] = rate_in
 
-    def push_state(self, body_v, body_w):
+    def push_forces(self, forces_in, moments_in):
+        self.forces = forces_in
+        self.moments = moments_in
 
-        elev = self.actuation_system.get_elevator()
-        rudd = self.actuation_system.get_rudder()
-
-        hinge_pose = np.array([0.0, 0.0, 0.0])
-        
-        v_hinge = velocity_Transform_Body_to_Winghinge(
-            body_v, body_w, hinge_pose, self.hinge_offset
-        )
-        w_hinge = body_w 
-
-        cop_pose = np.array([0.0, elev, rudd])
-        
-        v_cop = velocity_Transform_Body_to_Winghinge(
-            v_hinge, w_hinge, cop_pose, self.cop_offset
-        )
-        
-        w_cop = rate_Transform_Body_to_Winghinge(
-            w_hinge, cop_pose, 0.0
-        )
-
-        self.state = np.concatenate([v_cop, w_cop])
-
-    def push_forces(self, force_in, moment_in):
-        self.force = force_in
-        self.moment = moment_in
-
+    # Pull State & Data
     @property
     def velocity(self):
         return self.state[:3].copy()
@@ -260,7 +237,7 @@ class Tail_Frame:
     @property
     def angular_rate(self):
         return self.state[3:6].copy()
- 
+  
     @property
     def forces(self):
         return self.force.copy()
@@ -268,18 +245,6 @@ class Tail_Frame:
     @property
     def moments(self):
         return self.moment.copy()
-
-"""
-To Do 
-- Write the clas for Tail Frame
-- Make sure the transfomration functions are aligining with the class frame
-- Make sure the r_offset from teh class frame are correct with respect to the r_offset or leverarm in the transformation function.
-- Write the super class to handle the up pass and down pass 
-- write rigid body dynamics 
--  implement multiple aerodynamic model
-"""
-  
 """
 2. Calculated Offsets for your ClassesThese are the exact vectors you should plug into your HingeFrame instances:A. Wing Hinge OffsetThe wings are actually in front of the CoM (since $-0.041$ is more positive than $-0.222$).Left Wing Offset: $[+0.18097, +0.01345, +0.01557]$Right Wing Offset: $[+0.18097, -0.01323, +0.01557]$B. Tail Hinge OffsetThe tail is significantly behind the CoM.Tail Offset: $[-0.20148, +0.00054, +0.02835]$
-
 """
