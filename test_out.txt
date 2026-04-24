@@ -1,8 +1,24 @@
-Traceback (most recent call last):
-  File "/home/sriney/research/dynamics-survey/main.py", line 7, in <module>
-    from src.simulator.simulation import run_simulation
-  File "/home/sriney/research/dynamics-survey/src/simulator/__init__.py", line 2, in <module>
-    from .simulation import run_simulation
-  File "/home/sriney/research/dynamics-survey/src/simulator/simulation.py", line 1, in <module>
-    import numpy as np
-ModuleNotFoundError: No module named 'numpy'
+==== BIONIC FLAPPING WING UAV SIMULATOR ====
+Initializing Modular Simulator Loop...
+Time: 0.00s | Body Z Pos: -0.0000 | Body Z Vel: -0.0136
+Time: 0.10s | Body Z Pos: 0.1050 | Body Z Vel: 2.7441
+Time: 0.20s | Body Z Pos: 0.3475 | Body Z Vel: 0.9158
+Time: 0.30s | Body Z Pos: 0.3454 | Body Z Vel: 0.5846
+Time: 0.40s | Body Z Pos: 0.5389 | Body Z Vel: 2.1825
+Time: 0.50s | Body Z Pos: 0.5889 | Body Z Vel: -0.9185
+Time: 0.60s | Body Z Pos: 0.6064 | Body Z Vel: 1.7280
+Time: 0.70s | Body Z Pos: 0.7787 | Body Z Vel: 0.5447
+Time: 0.80s | Body Z Pos: 0.7271 | Body Z Vel: -0.1390
+Time: 0.90s | Body Z Pos: 0.8651 | Body Z Vel: 2.1097
+Time: 1.00s | Body Z Pos: 0.9320 | Body Z Vel: -0.8654
+Time: 1.10s | Body Z Pos: 0.9293 | Body Z Vel: 1.5496
+Time: 1.20s | Body Z Pos: 1.1275 | Body Z Vel: 1.1085
+Time: 1.30s | Body Z Pos: 1.1149 | Body Z Vel: 0.0277
+Time: 1.40s | Body Z Pos: 1.2846 | Body Z Vel: 2.6965
+Time: 1.50s | Body Z Pos: 1.4271 | Body Z Vel: -0.0952
+Time: 1.60s | Body Z Pos: 1.4950 | Body Z Vel: 2.3111
+Time: 1.70s | Body Z Pos: 1.7775 | Body Z Vel: 2.0826
+Time: 1.80s | Body Z Pos: 1.8785 | Body Z Vel: 1.2900
+Time: 1.90s | Body Z Pos: 2.1723 | Body Z Vel: 3.7742
+Simulation Complete.
+Data successfully exported to plot/simulation_data.csv

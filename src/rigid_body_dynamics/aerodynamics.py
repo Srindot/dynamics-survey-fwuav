@@ -26,24 +26,39 @@ class AerodynamicsSolver:
             v_in_sq = vel[0]**2 + vel[2]**2 + 1e-6
             v_mag = np.sqrt(v_in_sq)
             
-            # Local Angle of Attack (alpha_e)
-            # Our structural frame: +X is Forward (Leading Edge), +Z is Down.
-            # Flow from the front (-vel[0]) and flow from below (-vel[2]) create a positive AoA.
-            alpha_e = np.arctan2(-vel[2], -vel[0])
+            # Absolute Angle of Attack (magnitude) to keep C_L and C_D positive
+            alpha_mag = np.arctan2(np.abs(vel[2]), np.abs(vel[0]))
             
             # --- 1. Translational Circulation Force (Mao 2024 Eq 2 & 3) ---
-            # These empirical equations yield the Normal (C_L) and Tangential (C_D) coefficients.
-            C_L = 1.870 * np.sin(1.872 * alpha_e)
-            C_D = 1.667 - 1.585 * np.cos(1.968 * alpha_e)
+            # These empirical equations yield the Lift (C_L) and Drag (C_D) relative to airflow.
+            C_L = 1.870 * np.sin(1.872 * alpha_mag)
+            
+            # Added 1.2 parasitic drag (C_D0) to significantly lower the trim velocity to 6 m/s
+            C_D = 1.667 - 1.585 * np.cos(1.968 * alpha_mag) + 1.2
             dS = strip.chord * strip.strip_width
             q_dyn = 0.5 * self.rho * v_in_sq * dS
             
-            # Normal force acts along the local Z axis.
-            # Positive AoA generates lift in the -Z direction (UP).
-            F_tran_z = -q_dyn * C_L
+            # Convert to Normal (C_N) and Tangential (C_T) coefficients
+            C_N = C_D * np.sin(alpha_mag) + C_L * np.cos(alpha_mag)
+            C_T_friction = C_D * np.cos(alpha_mag)
+            C_T_suction = C_L * np.sin(alpha_mag)
             
-            # Tangential force acts along the local X axis, opposing the tangential air velocity.
-            F_tran_x = np.sign(vel[0]) * q_dyn * C_D
+            # --- AEROELASTIC TWIST EFFICIENCY FACTOR ---
+            # Mao 2024 uses a full structural deformation solver to calculate how the cellophane twists.
+            # Because our simulator is rigid-body, we apply an empirical efficiency factor to 
+            # simulate the air "spilling" off the flexible wing, bringing the rigid force down to ~12N.
+            efficiency = 0.15 
+            C_N *= efficiency
+            C_T_friction *= efficiency
+            C_T_suction *= efficiency
+            
+            # Normal force acts along the local Z axis.
+            # Opposes vertical flow (if air from below, vel[2] < 0, Force pushes UP / -Z)
+            F_tran_z = C_N * q_dyn * np.sign(vel[2])
+            
+            # Tangential force acts along the local X axis.
+            # Friction opposes horizontal airflow. Suction ALWAYS pulls towards Leading Edge (+X).
+            F_tran_x = (C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * q_dyn * 1.0)
             
             # --- 2. Rotational Circulation Force (Mao 2024 Eq 4 & 6) ---
             C_rot = 2.0 * np.pi * (0.75 - self.x_0_hat)
@@ -75,6 +90,28 @@ class AerodynamicsSolver:
             wrench = np.array([F_tot_x, F_tot_y, F_tot_z, 0.0, M_pitch, 0.0])
             strip.push_wrench(wrench)
 
+    def solve_body_forces(self, body):
+        
+        # Calculate Body Drag to prevent unrealistic infinite acceleration
+        vel = body.pull_airspeed
+        v_in_sq = vel[0]**2 + vel[1]**2 + vel[2]**2 + 1e-6
+        v_mag = np.sqrt(v_in_sq)
+        
+        # Increased body drag area and coefficient to match 6 m/s trim speed
+        Cd_body = 1.2
+        A_body = 0.10 # 0.10 m^2 frontal area
+        
+        q_dyn = 0.5 * self.rho * v_in_sq * A_body
+        
+        # Drag acts in the direction of the airflow (vel)
+        u_flow = vel / v_mag
+        F_drag_vec = (q_dyn * Cd_body) * u_flow
+        
+        wrench = np.zeros(6)
+        wrench[:3] = F_drag_vec
+        
+        body.push_wrench(wrench)
+
     def solve_tail_forces(self, tailcop):
         """
         Calculates simple flat-plate aerodynamics for the tail control surface.
@@ -82,18 +119,23 @@ class AerodynamicsSolver:
         vel = tailcop.pull_airspeed
         
         v_in_sq = vel[0]**2 + vel[2]**2 + 1e-6
-        alpha = np.arctan2(-vel[2], -vel[0])
+        alpha_mag = np.arctan2(np.abs(vel[2]), np.abs(vel[0]))
         
         # Standard flat plate formulas
-        C_L = 2 * np.pi * alpha
-        C_D = 1.28 * np.sin(alpha)**2 + 0.05
+        C_L = 2 * np.pi * alpha_mag
+        C_D = 1.28 * np.sin(alpha_mag)**2 + 0.05
         
         # Assume generic small tail area
         dS = 0.05 
         q_dyn = 0.5 * self.rho * v_in_sq * dS
         
-        F_z = -q_dyn * C_L
-        F_x = np.sign(vel[0]) * q_dyn * C_D
+        # Convert to Normal (C_N) and Tangential (C_T) coefficients
+        C_N = C_D * np.sin(alpha_mag) + C_L * np.cos(alpha_mag)
+        C_T_friction = C_D * np.cos(alpha_mag)
+        C_T_suction = C_L * np.sin(alpha_mag)
+        
+        F_z = C_N * q_dyn * np.sign(vel[2])
+        F_x = (C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * q_dyn * 1.0)
         
         wrench = np.array([F_x, 0.0, F_z, 0.0, 0.0, 0.0])
         tailcop.push_wrench(wrench)

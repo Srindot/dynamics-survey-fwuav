@@ -45,7 +45,9 @@ class Orcehstrator:
         # Initialize Coordinate Frames
 
         # Actuator Subsystem
-        self.actuator = ActuationSystem(flap_freq=10.0, flap_amplitude=np.deg2rad(60.0))
+        # Note: A 1.4m wingspan is very large (Eagle size).
+        # 4.0 Hz is a physically realistic flapping frequency for this scale.
+        self.actuator = ActuationSystem(flap_freq=4.0, flap_amplitude=np.deg2rad(60.0))
 
         # Aerodynamics Subsystem
         # x_0_hat = 0.0 because the 4mm massive leading edge rod acts as the pivot axis
@@ -155,8 +157,10 @@ class Orcehstrator:
 
     def aerodynamics_call(self):
         """ Blade Element Theory (BET) quasi-steady aerodynamic calculations. """
+        # Step 3: Aerodynamics - Compute aerodynamic forces
         self.aero_solver.solve_wing_forces(self.strips_l, self.actuator.pull_flap)
         self.aero_solver.solve_tail_forces(self.tailcop)
+        self.aero_solver.solve_body_forces(self.body)
 
     def up_pass(self, dt):
         """ Accumulates Wrenches into CoM, computes rigid body solver, steps time via integration. """
@@ -181,7 +185,8 @@ class Orcehstrator:
         wrench_body_tail = wrench_Transform_Tailhinge_to_Body(wrench_tailhinge, self.tailhinge.pull_pose)
         
         # --- BODY HUB AND SOLVER ---
-        f_tot, m_tot = sum_body_wrenches(wrench_body_l, wrench_body_r, wrench_body_tail)
+        wrench_body_aero = self.body.pull_wrench
+        f_tot, m_tot = sum_body_wrenches(wrench_body_l, wrench_body_r, wrench_body_tail, wrench_body_aero)
         self.body.push_wrench(np.concatenate([f_tot, m_tot]))
         
         # Grab Matrices natively from body

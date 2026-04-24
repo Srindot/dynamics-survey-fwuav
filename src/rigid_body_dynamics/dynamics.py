@@ -131,7 +131,7 @@ def calculate_gravity_force(pose_in, mass):
 
 
 
-def sum_body_wrenches(wing_hinge_left_wrench, wing_hinge_right_wrench, tail_wrench):
+def sum_body_wrenches(wing_hinge_left_wrench, wing_hinge_right_wrench, tail_wrench, body_aero_wrench):
     """
     sum_body_wrenches: Aggregates all external wrenches into a single Body-Frame wrench.
     
@@ -139,6 +139,7 @@ def sum_body_wrenches(wing_hinge_left_wrench, wing_hinge_right_wrench, tail_wren
         - wing_hinge_left_wrench (np.array): 6-DOF Wrench from left wing hinge.
         - wing_hinge_right_wrench (np.array): 6-DOF Wrench from right wing hinge.
         - tail_wrench (np.array): 6-DOF Wrench from tail frame.
+        - body_aero_wrench (np.array): 6-DOF aerodynamic Wrench on the body.
         
     Output:
         - total_force_out (np.array): Summed forces at Body CoM.
@@ -146,7 +147,7 @@ def sum_body_wrenches(wing_hinge_left_wrench, wing_hinge_right_wrench, tail_wren
     """
 
     # Direct addition of 6-DOF arrays safely
-    total_wrench = wing_hinge_left_wrench + wing_hinge_right_wrench + tail_wrench
+    total_wrench = wing_hinge_left_wrench + wing_hinge_right_wrench + tail_wrench + body_aero_wrench
 
     # Split output natively expected by calculate_state_derivative
     total_force_out = total_wrench[:3]
