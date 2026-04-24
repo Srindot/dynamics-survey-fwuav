@@ -1,7 +1,7 @@
 # Frame Transform : Contains all transformation between the Coordinate Frames 
 
 import numpy as np
-from quaternion_transform import transform_vector, transform_rate
+from .quaternion_transform import transform_vector, transform_rate
 """quaternion_transform.py:
     Frames: 
         
@@ -24,321 +24,234 @@ from quaternion_transform import transform_vector, transform_rate
 
 
 # Vector Transformation from Parent to Child 
-
 def vector_Transform_Inertial_to_Body(vec_in, pose_in):
     """
         vector_Transform_Inertial_to_Body: To Transform a Vector from Inertial frame to Body frame.
             Input: 
                 - vec_in(vx, vy, vz): Input Vector
-                - pose_in(ox, oy, oz): Pose in
+                - pose_in(6-elem): Global Pose 
              Output:
                 - vec_out(np.array(3)): Output vector in the output frame.
     """
     # Transform Vectors from Inertial Frame to Body Frame
+    rotation = pose_in[3:6]
     trans_array = np.zeros(3) # As we transforming vectors
 
-    return transform_vector(vec_in, pose_in, trans_array)
+    return transform_vector(vec_in, rotation, trans_array)
 
 
 
+# State Transform from Parent to Child
 
-def vector_Transform_Body_to_Tail(vec_in, elevator_deflection, rudder_deflection):
-
+def state_Transform_Body_to_Winghinge(state_in, pose_in, flap_in):
     """
-        vector_Transform_Body_to_Tail: To Transform a Vector from Body frame to Tail.
-            Input: 
-                - vec_in(vx, vy, vz): Input Vector
-                - elevator_deflection(oe): Change of elevator control surface in radians.
-                - rudder_deflection(or): Change of rudder control surface in radians.
-           Output:
-                    - vec_out(np.array(3)): Output vector in the output frame.
+    state_Transform_Body_to_Winghinge: Transforms full 6-DOF State from Body to Winghinge.
     """
-    # Transformation Array
-    tail_cop_pose = np.array([ 0.0, elevator_deflection, rudder_deflection])  
-    tail_cop_offset = np.zeros(3) 
-
-    return transform_vector(vec_in, tail_cop_pose, tail_cop_offset)
-
-
-
-def vector_Transform_Body_to_Winghinge(vec_in, flapping_angle, wing_incidence_angle):
-     """
-        vector_Transform_Body_to_Winghinge: To Transform a Vector from Body to Winghinge
-            Input: 
-                - vec_in(vx, vy, vz): Input Vector
-                - flapping_angle(of): The angle the flapping wing is oriented at the present time around the x-axis.
-             Output:
-                - vec_out(np.array(3)): Output vector in the output frame.
-    """
-
-    # Transformation to Wing Hinge Frame
-    wing_hinge_pose = np.array([flapping_angle, wing_incidence_angle, 0.0]) 
-    wing_hinge_offset = np.zeros(3)
-
-    return transform_vector(vec_in, wing_hinge_pose, wing_hinge_offset)
-
-
+    vel_in = state_in[:3]
+    rate_in = state_in[3:6]
+    r_offset = pose_in[:3]
     
-def vector_Transform_Winghinge_to_Wingstrip(vec_in, twist_chordwise, bend_spanwise):
-   """
-        vector_Transform_Winghinge_to_Wingstrip: To Transform a Vector from Winghinge to wingstrip.
-            Input: 
-                - vec_in(vx, vy, vz): Input Vector
-                - twist_chordwise(ofc): Each wing strip of BET twisting w.r.t. to y-axis.
-                - bend_chordwise(obc): The wing span binding along the wingspan due to incoming and apparent mass forces w.r.t. to x-axis.
-             Output:
-                - vec_out(np.array(3)): Output vector in the output frame.
-
-    """
-    # Transformation to Wing Strip Frame
-    wing_strip_pose = np.array([bend_spanwise, twist_chordwise, 0.0]) 
-    wing_strip_offset = np.zeros(3)
-
-    return transform_vector(vec_in, wing_strip_pose, wing_strip_offset)
-
-
-
-# Rate Trnasform from Parent to Child 
-
-def velocity_Transform_Body_to_Winghinge(vel_in, rate_in, pose_in, r_offset):
-     """
-        velocity_Transform_Body_to_Winghinge: To Transform the velocity rates from Body to Inertial.
-            Input: 
-                - vel_in(vx, vy, vz): Input Velcity of body frame.
-                - rate_in(rx, ry, rz): Input Rate.
-                - pose_in(ox, oy, oz): Output frame's pose w.r.t. input frame
-                - r_offset(rx, ry, rz): Leverarm between the com and the hinge
-         Output:
-                - vel_out(np.array(3)): Output velocity in the output frame.
-    """
+    # Structural mounting rotation + active flapping rotation (Stroke acts on local X-axis)
+    rotation = pose_in[3:6].copy()
+    rotation[0] += flap_in[0]
+    
+    # Linear Velocity Transfer 
     v_swing_body = vel_in + np.cross(rate_in, r_offset)
-    return transform_vector(v_swing_body, pose_in, np.zeros(3))
- 
+    vel_out = transform_vector(v_swing_body, rotation, np.zeros(3))
+    
+    # Angular Rate Transfer
+    rate_out = transform_rate(rate_in, rotation)
+    rate_out[0] += flap_in[1]  # += flap_rate (addition of angular velocities)
+    
+    return np.concatenate([vel_out, rate_out])
 
-
-def velocity_Transform_Winghinge_to_Wingstrip(vel_in, rate_in, pose_in, r_offset):
-     """
-        velocity_Transform_Winghinge_to_Wingstrip: To Transform the velocity rates from Body to Inertial.
-            Input: 
-                - vel_in(vx, vy, vz): Input Velcity of body frame.
-                - rate_in(rx, ry, rz): Input Rate.
-                - pose_in(ox, oy, oz): Output frame's pose w.r.t. input frame
-                - r_offset(rx, ry, rz): Leverarm between the com and the hinge
-         Output:
-                - vel_out(np.array(3)): Output velocity in the output frame.
+def state_Transform_Winghinge_to_Wingstrip(state_in, pose_in):
     """
-    v_swing_body = vel_in + np.cross(rate_in, r_offset)
-    return transform_vector(v_swing_body, pose_in, np.zeros(3))
- 
- 
-
-
-def angular_rate_Transform_Body_to_Winghinge(rate_in, wing_incidence_angle, flapping_angle, flapping_rate):
-     """
-        angular_rate_Transform_Body_to_Winghinge: To Transform the angular rates from Body to Inertial.
-            Input: 
-                - rate_in(rx, ry, rz): Input Rate.
-                - flapping_angle(ofp): Input angle of flapping wing around x-axis.   
-         Output:
-                - rate_out(np.array(3)): Output rates in the output frame.
+    state_Transform_Winghinge_to_Wingstrip: Transforms full 6-DOF State from Hinge to Strip.
     """
-   
-    # Wing Hinge Pose
-    pose_arr = np.array([ flapping_angle, wing_incidence_angle, 0.0 ])
-    rate_out = transform_rate(rate_in, pose_arr)
-    rate_out[0] += flapping_rate 
-    return rate_out 
-   
+    vel_in = state_in[:3]
+    rate_in = state_in[3:6]
+    r_offset = pose_in[:3]
+    rotation = pose_in[3:6]
+    
+    v_swing_hinge = vel_in + np.cross(rate_in, r_offset)
+    vel_out = transform_vector(v_swing_hinge, rotation, np.zeros(3))
+    rate_out = transform_rate(rate_in, rotation)
+    
+    return np.concatenate([vel_out, rate_out])
 
-def rate_Transform_Winghinge_to_Wingstrip(rate_in, twist_chordwise, bend_spanwise):
-  """
-        vector_Transform_Winghinge_to_Wingstrip: To Transform a Vector from Winghinge to wingstrip.
-            Input: 
-                - rate_in(rx, ry, rz): Input Rate
-                - twist_chordwise(ofc): Each wing strip of BET twisting about y-axis.
-                - bend_spanwise(obc): The wing span binding along the wingspan due to incoming and apparent mass forces about x-axis.
-           Output:
-                - rate_out(np.array(3)): Output rates in the output frame.
+def state_Transform_Body_to_Tailhinge(state_in, pose_in):
     """
-    pose_in = np.array([bend_spanwise, twist_chordwise, 0.0])
-    return transform_rate(rate_in, pose_in)
+    Transforms 6-DOF State from Body Center of Mass to the Tail Hinge.
+    """
+    vel_in = state_in[:3]
+    rate_in = state_in[3:6]
+    r_offset = pose_in[:3]
+    rotation = pose_in[3:6]
+    
+    v_swing = vel_in + np.cross(rate_in, r_offset)
+    vel_out = transform_vector(v_swing, rotation, np.zeros(3))
+    rate_out = transform_rate(rate_in, rotation)
+    
+    return np.concatenate([vel_out, rate_out])
+
+def state_Transform_Tailhinge_to_TailCOP(state_in, pose_in, deflection_in):
+    """
+    Transforms 6-DOF State from the Tail Hinge to the Center of Pressure.
+    Applies Elevator (pitch/Y) and Rudder (yaw/Z) servo deflections.
+    """
+    vel_in = state_in[:3]
+    rate_in = state_in[3:6]
+    r_offset = pose_in[:3]
+    
+    # Apply surface deflection twist
+    rotation = pose_in[3:6].copy()
+    rotation[1] += deflection_in[0]  # Elevator (Pitch)
+    rotation[2] += deflection_in[1]  # Rudder (Yaw)
+    
+    v_swing = vel_in + np.cross(rate_in, r_offset)
+    vel_out = transform_vector(v_swing, rotation, np.zeros(3))
+    rate_out = transform_rate(rate_in, rotation) # Applies surface deflection twist
+    
+    return np.concatenate([vel_out, rate_out])
  
 
 
 # Vector Transform from Child to Parent
 
 
-def wrench_Transform_Body_to_Inertial(force_in, moment_in, pose_body):
+def wrench_Transform_Body_to_Inertial(wrench_in, pose_in):
     """
     wrench_Transform_Body_to_Inertial: Transforms the total Force and Moment 
     from the Body Frame back to the Inertial (NED) Frame.
-    
-    Input:
-         - force_in (np.array): Total summed Force in Body Frame.
-         - moment_in (np.array): Total summed Moment in Body Frame.
-         - pose_body (np.array): The rotation vector. 
-    Output: 
-        - force_out (np.array), moment_out (np.array)
     """
-    force_out = transform_vector(force_in, -pose_body, np.zeros(3))
-    moment_out = transform_vector(moment_in, -pose_body, np.zeros(3))
+    force_in = wrench_in[:3]
+    moment_in = wrench_in[3:6]
+    rotation = pose_in[3:6]
     
-    return force_out, moment_out
+    force_out = transform_vector(force_in, -rotation, np.zeros(3))
+    moment_out = transform_vector(moment_in, -rotation, np.zeros(3))
+    
+    return np.concatenate([force_out, moment_out])
 
 
 
-def wrench_Transform_Winghinge_to_Body(force_in, moment_in, flapping_angle, wing_incidence_angle, r_offset):
+def wrench_Transform_Winghinge_to_Body(wrench_in, pose_in, flap_in):
     """
     wrench_Transform_Winghinge_to_Body: Transforms the total Wrench from the Hinge back to the Body Center of Mass.
-    
-    Input:
-         - force_in: Total summed Force in the Hinge Frame.
-         - moment_in: Total summed Moment in the Hinge Frame.
-         - flapping_angle: Current flapping orientation (around X).
-         - wing_incidence_angle: Fixed or variable wing tilt (around Y).
-         - r_offset: Vector FROM Body CoM TO Hinge pivot (expressed in BODY frame).
-
-    Output: 
-        - force_out (np.array), moment_out (np.array)
     """
-
-    # pose_in
-    pose_hinge = np.array([ flapping_angle, wing_incidence_angle, 0.0 ])
+    force_in = wrench_in[:3]
+    moment_in = wrench_in[3:6]
+    r_offset = pose_in[:3]
     
-    # Wrench Rotation
-    force_out = transform_vector(force_in, -pose_hinge, np.zeros(3))
-    moment_rotated = transform_vector(moment_in, -pose_hinge, np.zeros(3))
+    # Reconstruct the forward rotation, then invert for reverse transform
+    rotation = pose_in[3:6].copy()
+    rotation[0] += flap_in[0]
 
-    # Finding the Moment from force
+    force_out = transform_vector(force_in, -rotation, np.zeros(3))
+    moment_rotated = transform_vector(moment_in, -rotation, np.zeros(3))
+
     moment_coupled = np.cross(r_offset, force_out)
     moment_out = moment_rotated + moment_coupled
 
-    return force_out, moment_out
+    return np.concatenate([force_out, moment_out])
 
 
 
-def wrench_Transform_Wingstrip_to_Winghinge(force_in, moment_in, bend_spanwise, twist_chordwise, r_offset):
+def wrench_Transform_Wingstrip_to_Winghinge(wrench_in, pose_in):
     """
     wrench_Transform_Wingstrip_to_Winghinge: Transform Wrench(Force, Momemnt) from Wing strip to hinge. 
-    Input:
-         - force_in(fx, fy, fz): Input Force Vector in WingStripFrame
-         - moment_in(mx, my, mz): Input Moment Vector in WingStrip Frame
-         - pose_in(ox, oy, oz): Pose in
-
-    Output: 
-        - force_out (np.array(3)), moment_out (np.array(3))
     """
+    force_in = wrench_in[:3]
+    moment_in = wrench_in[3:6]
+    r_offset = pose_in[:3]
+    rotation = pose_in[3:6]
 
-    pose_in = np.array([ bend_spanwise, twist_chordwise, 0.0 ])
-
-    f_hinge = transform_vector(force_in, -pose_in, np.zeros(3))
-    m_out = transform_vector(moment_in, -pose_in, np.zeros(3))
+    f_hinge = transform_vector(force_in, -rotation, np.zeros(3))
+    m_rotated = transform_vector(moment_in, -rotation, np.zeros(3))
 
     m_coupled = np.cross(r_offset, f_hinge)
+    m_hinge = m_rotated + m_coupled
 
-    m_out = m_out + m_coupled
-
-    return f_hinge, m_out 
-
+    return np.concatenate([f_hinge, m_hinge])
 
 
-def wrench_Transform_Tail_to_Body(force_in, moment_in, elevator_deflection, rudder_deflection):
+
+def wrench_Transform_TailCOP_to_Tailhinge(wrench_in, pose_in, deflection_in):
     """
-    wrench_Transform_Tail_to_Body: Transform Wrench(Forces, Moments) from Tail to Body frame.
-    
-    Inputs:
-        - force_in: Force at Tail CoP (Tail Frame)
-        - moment_in: Moment at Tail CoP (Tail Frame)
-        - elevator_deflection: Rotation around Y
-        - rudder_deflection: Rotation around Z
-
-    Output: 
-        - force_out(np.array(3)), moment_out(np.array(3))
-
+    wrench_Transform_TailCOP_to_Tailhinge: Rotates aerodynamics forces from the deflected Tail CoP back to the Hinge.
     """
-
-    # Pose_in (COP -> Hinge)
-    r_cop_to_hinge = np.array([-0.1, 0.0, 0.0]) 
-    pose_tail = np.array([0.0, elevator_deflection, rudder_deflection])
-
-    # Wrench Rotation frrom COP to Hinge
-    f_hinge = transform_vector(force_in, -pose_tail, np.zeros(3))
-    m_rotated_hinge = transform_vector(moment_in, -pose_tail, np.zeros(3))
-
-    # Moment at hinge 
-    m_hinge = m_rotated_hinge + np.cross(r_cop_to_hinge, f_hinge)
-
-    # Pose_in (Hinge -> Body)
-    r_hinge_to_com = np.array([-0.3, 0.0, -0.1])
+    force_in = wrench_in[:3]
+    moment_in = wrench_in[3:6]
+    r_offset = pose_in[:3]
     
-    f_out = f_hinge 
+    rotation = pose_in[3:6].copy()
+    rotation[1] += deflection_in[0]
+    rotation[2] += deflection_in[1]
     
-    # Moment at body 
-    m_out = m_hinge + np.cross(r_hinge_to_com, f_out)
+    f_hinge = transform_vector(force_in, -rotation, np.zeros(3))
+    m_rotated = transform_vector(moment_in, -rotation, np.zeros(3))
+    
+    m_coupled = np.cross(r_offset, f_hinge)
+    m_hinge = m_rotated + m_coupled
+    
+    return np.concatenate([f_hinge, m_hinge])
 
-    return f_out, m_out
+def wrench_Transform_Tailhinge_to_Body(wrench_in, pose_in):
+    """
+    wrench_Transform_Tailhinge_to_Body: Rotates the hinge forces back to the Body CoM.
+    """
+    force_in = wrench_in[:3]
+    moment_in = wrench_in[3:6]
+    r_offset = pose_in[:3]
+    rotation = pose_in[3:6]
+    
+    f_out = transform_vector(force_in, -rotation, np.zeros(3))
+    m_rotated = transform_vector(moment_in, -rotation, np.zeros(3))
+    
+    m_coupled = np.cross(r_offset, f_out)
+    m_out = m_rotated + m_coupled
+    
+    return np.concatenate([f_out, m_out])
 
 
 
 # Rate transform from Body to Parent
 
-def rate_Transform_Wingstrip_to_Winghinge(vec_in, twist_chordwise, bend_spanwise):
+def state_Transform_Body_to_Inertial(state_in, pose_in):
     """
-        rate_Transform_Wingstrip_to_Winghinge: To Transform the rates from Wingstrip to Winghinge.
-            Input: 
-                - vec_in(vx, vy, vz): Input Vector
-                - twist_chordwise(ofc): Each wing strip of BET twisting w.r.t. to y-axis.
-                - bend_chordwise(obc): The wing span binding along the wingspan due to incoming and apparent mass forces w.r.t. to x-axis.
-   
-           Output:
-                - rate_out(np.array(3)): Output rates in the output frame.
+    state_Transform_Body_to_Inertial: Transforms full 6-DOF State from Body to Inertial.
     """
+    vel_in = state_in[:3]
+    rate_in = state_in[3:6]
+    rotation = pose_in[3:6]
     
-    # Transformation to Wing hing Frame
-    wing_strip_pose = np.array([bend_spanwise, twist_chordwise, 0.0]) 
+    vel_out = transform_vector(vel_in, -rotation, np.zeros(3))
+    rate_out = transform_rate(rate_in, -rotation)
+    
+    return np.concatenate([vel_out, rate_out])
 
-    return transform_rate(vec_in, -wing_strip_pose)
 
+# Wrench Summation and Abstraction Utilities
 
-
-def rate_Transform_Body_to_Inertial(rate_in, pose_in):
+def sum_wing_strip_wrenches(strip_objects):
     """
-        rate_Transform_Body_to_Inertial: To Transform the rates from Body to Inertial.
-            Input: 
-                - rate_in(vx, vy, vz): Input Rates
-                - pose_in(ox, oy, oz): Input pose of the coordinate frame of Body w.r.t. to Inertal Frame.  
-           Output:
-                - rate_out(np.array(3)): Output rates in the output frame.
+    sum_wing_strip_wrenches: Iterates through Wing_Strip objects, transforms their local wrenches to the Winghinge, and sums them.
     """
-     
-    return transform_rate(rate_in, -pose_in)
+    wrench_hinge = np.zeros(6)
+    for strip in strip_objects:
+        wrench_hinge += wrench_Transform_Wingstrip_to_Winghinge(strip.pull_wrench, strip.pull_pose)
+    return wrench_hinge
 
-# ACHRIVE IMPO INFROMATION 
-# def vector_Transform_Body_to_Tail(vec_in, elevator_deflection, rudder_deflection):
-#
-#     # Transform to Hinge Tail
-#
-#     # Transformation Array
-#     tail_hinge_offset = np.array([ -0.3, 0.0, -0.1])
-#     tail_hinge_pose = np.array([0,0,0])
-#
-#     # Trnasform Function Call
-#     vector_tail_hingeframe = transform_vector(vec_in, tail_hinge_pose, tail_hinge_offset)
-#
-#
-#     # Transform to Tail COP
-#
-#     # Tail dimension ( Span =  32 cm, Root Chord = 22)
-#     tail_span = 0.32
-#     tail_chord = 0.22
-#     # Assuming Centre Of Pressure (COM) for Tail is about *45%* of root chord.
-#     tail_cop= 0.1    
-#
-#     # Transformation Array
-#     tail_cop_pose = np.array([ 0.0, elevator_deflection, rudder_deflection])  
-#     tail_cop_offset = np.array([tail_cop, 0.0, 0.0]) 
-#
-#     # Transform Function Call
-#     vector_tail_copframe = transform_vector(vector_tail_hingeframe, tail_cop_pose, tail_cop_offset)
-#
-#     return vector_tail_copframe
+def mirror_wing_wrench(wrench_left):
+    """
+    mirror_wing_wrench: Mirrors the left wing wrench to the right wing by flipping Y-axis dependent components (Lateral Force, Roll, Yaw).
+    """
+    return np.array([
+        wrench_left[0],  # Fx (unchanged)
+       -wrench_left[1],  # Fy (flipped)
+        wrench_left[2],  # Fz (unchanged)
+       -wrench_left[3],  # Mx (flipped)
+        wrench_left[4],  # My (unchanged)
+       -wrench_left[5]   # Mz (flipped)
+    ])
