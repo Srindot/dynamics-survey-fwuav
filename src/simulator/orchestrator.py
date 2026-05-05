@@ -35,7 +35,7 @@ from src.rigid_body_dynamics.dynamics import (
 from src.actuation.actuator import ActuationSystem
     
 # Aerodynamics Import 
-from src.rigid_body_dynamics.aerodynamics import AerodynamicsSolver
+from src.aerodynamics.aerodynamics import AerodynamicsSolver
 
 
 # Super Class   

@@ -44,10 +44,17 @@ class AerodynamicsSolver:
             C_T_suction = C_L * np.sin(alpha_mag)
             
             # --- AEROELASTIC TWIST EFFICIENCY FACTOR ---
-            # Mao 2024 uses a full structural deformation solver to calculate how the cellophane twists.
-            # Because our simulator is rigid-body, we apply an empirical efficiency factor to 
-            # simulate the air "spilling" off the flexible wing, bringing the rigid force down to ~12N.
-            efficiency = 0.15 
+            # Real flexible wings (cellophane membrane) passively twist during the upstroke,
+            # shedding aerodynamic load and preventing anti-lift. During the downstroke,
+            # the membrane stays flat and generates full lift. This asymmetry is what
+            # creates net positive lift over a flap cycle (Mao 2024 structural deformation model).
+            #
+            # flap_rate < 0 → downstroke (wing tip moving DOWN in NED) → membrane stays rigid
+            # flap_rate > 0 → upstroke (wing tip moving UP in NED) → membrane twists, sheds load
+            if flap_rate < 0:
+                efficiency = 0.30   # Downstroke: membrane is taut, full aero loading
+            else:
+                efficiency = 0.05   # Upstroke: membrane twists passively, ~85% load reduction
             C_N *= efficiency
             C_T_friction *= efficiency
             C_T_suction *= efficiency
@@ -58,7 +65,10 @@ class AerodynamicsSolver:
             
             # Tangential force acts along the local X axis.
             # Friction opposes horizontal airflow. Suction ALWAYS pulls towards Leading Edge (+X).
-            F_tran_x = (C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * q_dyn * 1.0)
+            # Leading edge suction only exists when flow is attached (low AoA).
+            # At stall (90°), suction drops to zero. cos²(alpha) models this decay.
+            suction_efficiency = np.cos(alpha_mag)**2
+            F_tran_x = -(C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * suction_efficiency * q_dyn * 1.0)
             
             # --- 2. Rotational Circulation Force (Mao 2024 Eq 4 & 6) ---
             C_rot = 2.0 * np.pi * (0.75 - self.x_0_hat)
@@ -105,7 +115,7 @@ class AerodynamicsSolver:
         
         # Drag acts in the direction of the airflow (vel)
         u_flow = vel / v_mag
-        F_drag_vec = (q_dyn * Cd_body) * u_flow
+        F_drag_vec = -(q_dyn * Cd_body) * u_flow
         
         wrench = np.zeros(6)
         wrench[:3] = F_drag_vec
@@ -134,8 +144,11 @@ class AerodynamicsSolver:
         C_T_friction = C_D * np.cos(alpha_mag)
         C_T_suction = C_L * np.sin(alpha_mag)
         
+        # Flat plates do not physically generate leading-edge suction
+        C_T_suction = 0.0
+        
         F_z = C_N * q_dyn * np.sign(vel[2])
-        F_x = (C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * q_dyn * 1.0)
+        F_x = -(C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * q_dyn * 1.0)
         
         wrench = np.array([F_x, 0.0, F_z, 0.0, 0.0, 0.0])
         tailcop.push_wrench(wrench)
