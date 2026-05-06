@@ -1,24 +1,70 @@
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:45: RuntimeWarning: invalid value encountered in cos
+  C =  np.cos(o)
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:46: RuntimeWarning: invalid value encountered in sin
+  S =  np.sin(o)
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:99: RuntimeWarning: invalid value encountered in sin
+  S =  np.sin(o/2)
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:102: RuntimeWarning: invalid value encountered in cos
+  qr = np.cos(o/2)
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:26: RuntimeWarning: overflow encountered in scalar power
+  v_in_sq = vel[0]**2 + vel[2]**2 + 1e-6
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:97: RuntimeWarning: invalid value encountered in scalar multiply
+  M_pitch = F_tot_z * strip.chordwise_cop
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:131: RuntimeWarning: overflow encountered in scalar power
+  v_in_sq = vel[0]**2 + vel[2]**2 + 1e-6
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:151: RuntimeWarning: invalid value encountered in scalar multiply
+  F_x = -(C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * q_dyn * 1.0)
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:107: RuntimeWarning: overflow encountered in scalar power
+  v_in_sq = vel[0]**2 + vel[1]**2 + vel[2]**2 + 1e-6
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:118: RuntimeWarning: invalid value encountered in multiply
+  F_drag_vec = -(q_dyn * Cd_body) * u_flow
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1722: RuntimeWarning: invalid value encountered in multiply
+  multiply(a2, b0, out=cp1)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1723: RuntimeWarning: invalid value encountered in multiply
+  multiply(a0, b2, out=tmp)
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:76: RuntimeWarning: invalid value encountered in matmul
+  vector_new = R @ vec_in_hom
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1719: RuntimeWarning: invalid value encountered in multiply
+  multiply(a1, b2, out=cp0)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1719: RuntimeWarning: overflow encountered in multiply
+  multiply(a1, b2, out=cp0)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1720: RuntimeWarning: overflow encountered in multiply
+  tmp = array(a2 * b1)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1722: RuntimeWarning: overflow encountered in multiply
+  multiply(a2, b0, out=cp1)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1723: RuntimeWarning: overflow encountered in multiply
+  multiply(a0, b2, out=tmp)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1724: RuntimeWarning: invalid value encountered in subtract
+  cp1 -= tmp
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1725: RuntimeWarning: overflow encountered in multiply
+  multiply(a0, b1, out=cp2)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1726: RuntimeWarning: overflow encountered in multiply
+  multiply(a1, b0, out=tmp)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1721: RuntimeWarning: invalid value encountered in subtract
+  cp0 -= tmp
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1727: RuntimeWarning: invalid value encountered in subtract
+  cp2 -= tmp
 ==== BIONIC FLAPPING WING UAV SIMULATOR ====
 Initializing Modular Simulator Loop...
 Time: 0.00s | Body Z Pos: 0.0000 | Body Z Vel: 0.0020
-Time: 0.10s | Body Z Pos: 0.1409 | Body Z Vel: 3.1760
-Time: 0.20s | Body Z Pos: 0.3365 | Body Z Vel: -0.7992
-Time: 0.30s | Body Z Pos: 0.1193 | Body Z Vel: -1.9982
-Time: 0.40s | Body Z Pos: -0.0141 | Body Z Vel: -1.4781
-Time: 0.50s | Body Z Pos: -0.2912 | Body Z Vel: -3.2993
-Time: 0.60s | Body Z Pos: -0.4073 | Body Z Vel: 1.8246
-Time: 0.70s | Body Z Pos: -0.1368 | Body Z Vel: 1.2852
-Time: 0.80s | Body Z Pos: -0.1540 | Body Z Vel: -0.1687
-Time: 0.90s | Body Z Pos: -0.1387 | Body Z Vel: -0.8073
-Time: 1.00s | Body Z Pos: -0.4259 | Body Z Vel: -3.7501
-Time: 1.10s | Body Z Pos: -0.5621 | Body Z Vel: 1.9185
-Time: 1.20s | Body Z Pos: -0.2864 | Body Z Vel: 1.0355
-Time: 1.30s | Body Z Pos: -0.3580 | Body Z Vel: -0.9154
-Time: 1.40s | Body Z Pos: -0.3923 | Body Z Vel: -0.6602
-Time: 1.50s | Body Z Pos: -0.5451 | Body Z Vel: -0.9944
-Time: 1.60s | Body Z Pos: -0.3233 | Body Z Vel: 4.5342
-Time: 1.70s | Body Z Pos: -0.4587 | Body Z Vel: -1.1774
-Time: 1.80s | Body Z Pos: -0.1409 | Body Z Vel: -3.1012
-Time: 1.90s | Body Z Pos: -0.2297 | Body Z Vel: -0.0635
+Time: 0.10s | Body Z Pos: 0.1409 | Body Z Vel: 3.1765
+Time: 0.20s | Body Z Pos: 0.3561 | Body Z Vel: -0.1332
+Time: 0.30s | Body Z Pos: 0.3115 | Body Z Vel: 0.9823
+Time: 0.40s | Body Z Pos: 0.5571 | Body Z Vel: 2.6064
+Time: 0.50s | Body Z Pos: 0.7321 | Body Z Vel: 1.2942
+Time: 0.60s | Body Z Pos: 1.0197 | Body Z Vel: 4.3680
+Time: 0.70s | Body Z Pos: 1.3920 | Body Z Vel: 3.2375
+Time: 0.80s | Body Z Pos: 1.7064 | Body Z Vel: 4.2775
+Time: 0.90s | Body Z Pos: 2.2015 | Body Z Vel: 4.4302
+Time: 1.00s | Body Z Pos: 2.6678 | Body Z Vel: 4.3778
+Time: 1.10s | Body Z Pos: 3.2588 | Body Z Vel: 6.8392
+Time: 1.20s | Body Z Pos: 3.9800 | Body Z Vel: 7.8300
+Time: 1.30s | Body Z Pos: 4.7889 | Body Z Vel: 9.8132
+Time: 1.40s | Body Z Pos: 5.9239 | Body Z Vel: 12.7511
+Time: 1.50s | Body Z Pos: 7.1420 | Body Z Vel: 11.9406
+Time: 1.60s | Body Z Pos: 8.8453 | Body Z Vel: 21.6563
+Time: 1.70s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.80s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.90s | Body Z Pos: nan | Body Z Vel: nan
 Simulation Complete.
 Data successfully exported to plot/simulation_data.csv
