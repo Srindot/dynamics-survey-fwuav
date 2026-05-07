@@ -1,0 +1,2 @@
+Final Pitch Angle (pose[4]): 289.34 degrees
+Conclusion: POSITIVE M_y leads to POSITIVE pitch.

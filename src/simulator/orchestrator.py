@@ -47,7 +47,7 @@ class Orcehstrator:
         # Actuator Subsystem
         # Note: A 1.4m wingspan is very large (Eagle size).
         # 4.0 Hz is a physically realistic flapping frequency for this scale.
-        self.actuator = ActuationSystem(flap_freq=4.0, flap_amplitude=np.deg2rad(60.0))
+        self.actuator = ActuationSystem(flap_freq=2.0, flap_amplitude=np.deg2rad(60.0))
 
         # Aerodynamics Subsystem
         # x_0_hat = 0.0 because the 4mm massive leading edge rod acts as the pivot axis
@@ -60,6 +60,8 @@ class Orcehstrator:
         self.body = Body_Frame()
         
         # Wing Hinge Left & Right
+        # No static pitch offset: forward thrust comes from body pitch dynamics,
+        # not from a static hinge tilt (which creates equal forward/backward forces).
         self.winghinge_l = Winghinge_Frame(side="left")
         self.winghinge_r = Winghinge_Frame(side="right")
 

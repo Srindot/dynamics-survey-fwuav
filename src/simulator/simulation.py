@@ -4,7 +4,7 @@ from src.output.logger import SimulationLogger
 
 def simulation(dt=0.01, iterations=1000, wing_span=1.4, num_strips=10):
     sim = Orcehstrator(wing_span=wing_span, num_strips=num_strips)
-    logger = SimulationLogger()
+    logger = SimulationLogger(num_strips=num_strips)
     print("Initializing Modular Simulator Loop...")
     
     for step in range(iterations):
@@ -23,7 +23,8 @@ def simulation(dt=0.01, iterations=1000, wing_span=1.4, num_strips=10):
         logger.log_step(t, sim)
         
         if step % 100 == 0:
-            print(f"Time: {t:.2f}s | Body Z Pos: {sim.body.pull_pose[2]:.4f} | Body Z Vel: {sim.body.pull_state[2]:.4f}")
+            pitch_deg = np.rad2deg(sim.body.pull_pose[4])
+            print(f"Time: {t:.2f}s | Vx: {sim.body.pull_state[0]:+.4f} | Pitch: {pitch_deg:+.2f}° | Zpos: {sim.body.pull_pose[2]:.4f} | Vz: {sim.body.pull_state[2]:.4f}")
             
     print("Simulation Complete.")
     logger.save_to_csv()

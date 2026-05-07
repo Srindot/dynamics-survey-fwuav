@@ -1,0 +1,3 @@
+Elevator = +20 deg -> Tail Fz = 2.61 N
+Positive Fz (Downward Force). This will push the tail DOWN, pushing the nose UP (Negative Pitch Moment).
+Conclusion: Positive Elevator -> Nose Up Pitch Moment!

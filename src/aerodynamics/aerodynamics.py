@@ -26,68 +26,76 @@ class AerodynamicsSolver:
             v_in_sq = vel[0]**2 + vel[2]**2 + 1e-6
             v_mag = np.sqrt(v_in_sq)
             
-            # Absolute Angle of Attack (magnitude) to keep C_L and C_D positive
-            alpha_mag = np.arctan2(np.abs(vel[2]), np.abs(vel[0]))
+            # Absolute Geometric Angle of Attack
+            alpha_geom = np.arctan2(np.abs(vel[2]), np.abs(vel[0]))
+            
+            # --- STRUCTURAL TWIST APPROXIMATION ---
+            # In NED convention: flap_rate > 0 = wing moves DOWN = DOWNSTROKE
+            #                    flap_rate < 0 = wing moves UP   = UPSTROKE
+            # During DOWNSTROKE: membrane is pushed taut against veins → no twist
+            # During UPSTROKE:   membrane feathers passively → passive twist reduces AOA
+            MAX_TWIST = 0.785
+            NOMINAL_MAX_FLAP_RATE = 15.0 
+            
+            if flap_rate < 0:
+                # UPSTROKE (wing moving UP): membrane twists passively to shed load
+                epsilon_ce = MAX_TWIST * (np.abs(flap_rate) / NOMINAL_MAX_FLAP_RATE)
+                epsilon_ce = np.clip(epsilon_ce, 0.0, MAX_TWIST)
+                epsilon_ce_dot = (MAX_TWIST / NOMINAL_MAX_FLAP_RATE) * flap_accel
+            else:
+                # DOWNSTROKE (wing moving DOWN): membrane is taut, full force
+                epsilon_ce = 0.0
+                epsilon_ce_dot = 0.0
+
+            # True Relative Angle of Attack (alpha_e)
+            # The wing twists to align with the flow, reducing the effective AOA.
+            alpha_e = np.abs(alpha_geom - epsilon_ce)
             
             # --- 1. Translational Circulation Force (Mao 2024 Eq 2 & 3) ---
             # These empirical equations yield the Lift (C_L) and Drag (C_D) relative to airflow.
-            C_L = 1.870 * np.sin(1.872 * alpha_mag)
+            C_L = 1.870 * np.sin(1.872 * alpha_e)
+            C_D = 1.667 - 1.585 * np.cos(1.968 * alpha_e)
             
-            # Added 1.2 parasitic drag (C_D0) to significantly lower the trim velocity to 6 m/s
-            C_D = 1.667 - 1.585 * np.cos(1.968 * alpha_mag) + 1.2
             dS = strip.chord * strip.strip_width
             q_dyn = 0.5 * self.rho * v_in_sq * dS
             
             # Convert to Normal (C_N) and Tangential (C_T) coefficients
-            C_N = C_D * np.sin(alpha_mag) + C_L * np.cos(alpha_mag)
-            C_T_friction = C_D * np.cos(alpha_mag)
-            C_T_suction = C_L * np.sin(alpha_mag)
+            # These are in the STRIP frame (not twisted frame) because alpha_e already
+            # accounts for the twist. This is the key insight from Mao 2024.
+            C_N = C_D * np.sin(alpha_e) + C_L * np.cos(alpha_e)
+            C_T_friction = C_D * np.cos(alpha_e)
+            C_T_suction = C_L * np.sin(alpha_e)
             
-            # --- AEROELASTIC TWIST EFFICIENCY FACTOR ---
-            # Real flexible wings (cellophane membrane) passively twist during the upstroke,
-            # shedding aerodynamic load and preventing anti-lift. During the downstroke,
-            # the membrane stays flat and generates full lift. This asymmetry is what
-            # creates net positive lift over a flap cycle (Mao 2024 structural deformation model).
-            #
-            # flap_rate < 0 → downstroke (wing tip moving DOWN in NED) → membrane stays rigid
-            # flap_rate > 0 → upstroke (wing tip moving UP in NED) → membrane twists, sheds load
-            if flap_rate < 0:
-                efficiency = 0.30   # Downstroke: membrane is taut, full aero loading
-            else:
-                efficiency = 0.05   # Upstroke: membrane twists passively, ~85% load reduction
-            C_N *= efficiency
-            C_T_friction *= efficiency
-            C_T_suction *= efficiency
+            # Forces in the STRIP frame (twist already in alpha_e, no extra projection needed)
+            # Normal force: perpendicular to chord, sign follows vel[2] direction
+            F_N = C_N * q_dyn * np.sign(vel[2])
             
-            # Normal force acts along the local Z axis.
-            # Opposes vertical flow (if air from below, vel[2] < 0, Force pushes UP / -Z)
-            F_tran_z = C_N * q_dyn * np.sign(vel[2])
+            # Tangential friction: along chord, sign follows vel[0] (opposes motion)
+            F_T_friction = C_T_friction * q_dyn * np.sign(vel[0])
             
-            # Tangential force acts along the local X axis.
-            # Friction opposes horizontal airflow. Suction ALWAYS pulls towards Leading Edge (+X).
-            # Leading edge suction only exists when flow is attached (low AoA).
-            # At stall (90°), suction drops to zero. cos²(alpha) models this decay.
-            suction_efficiency = np.cos(alpha_mag)**2
-            F_tran_x = -(C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * suction_efficiency * q_dyn * 1.0)
+            # Leading-edge suction: always pulls toward the leading edge (forward = -X in some conventions, +X here)
+            # Suction efficiency drops at high AOA
+            suction_efficiency = np.cos(alpha_e)**2
+            F_T_suction = C_T_suction * suction_efficiency * q_dyn
+            
+            F_T = F_T_friction + F_T_suction
             
             # --- 2. Rotational Circulation Force (Mao 2024 Eq 4 & 6) ---
             C_rot = 2.0 * np.pi * (0.75 - self.x_0_hat)
-            # Force generated by the wing angularly sweeping through the air.
-            # Because we do not have active pitching motion (alpha_dot = 0), this is 0.
-            F_rot_z = 0.0
+            r_ce = strip.chord / 2.0
+            r_se = np.abs(strip.y_offset)
+            # Rotational force acts normal to chord, opposes the twist rate
+            F_rot_z = -C_rot * self.rho * flap_rate * (epsilon_ce_dot * r_se * r_ce) * dS
             
             # --- 3. Added Mass Force (Mao 2024 Eq 7 simplified) ---
-            # Approximating the mass of the air cylinder accelerated by the wing.
-            # Since our wing is horizontal and flaps vertically, the normal is aligned with the acceleration.
-            # Added Mass inherently opposes the acceleration.
             F_add_z = -0.25 * np.pi * self.rho * (strip.chord**2) * (flap_accel * strip.y_offset) * strip.strip_width
             
             # --- 4. Wing Structural Inertial Force (Mao 2024 Eq 8 & Eq 23) ---
-            # Inertial force opposes the acceleration of the localized mass of the strips CF rods and cellophane
             F_iner_z = -strip.strip_mass * (flap_accel * strip.y_offset)
             
             # --- Total Force Assignment ---
-            # Sum forces and apply to local strip center of pressure
+            F_tran_x = F_T
+            F_tran_z = F_N
             F_tot_x = F_tran_x
             F_tot_y = 0.0
             F_tot_z = F_tran_z + F_rot_z + F_add_z + F_iner_z
@@ -96,59 +104,82 @@ class AerodynamicsSolver:
             # CoP is relative to leading edge
             M_pitch = F_tot_z * strip.chordwise_cop
             
+            # SAVE variables for logging
+            strip.alpha_geom = alpha_geom
+            strip.epsilon_ce = epsilon_ce
+            strip.alpha_e = alpha_e
+            strip.v_in_sq = v_in_sq
+            strip.F_tran_x = F_tran_x
+            strip.F_tran_z = F_tran_z
+            strip.F_rot_z = F_rot_z
+            strip.F_add_z = F_add_z
+            strip.F_iner_z = F_iner_z
+            strip.F_tot_x = F_tot_x
+            strip.F_tot_z = F_tot_z
+            strip.M_pitch = M_pitch
+            
             # Update the strip's internal wrench
             wrench = np.array([F_tot_x, F_tot_y, F_tot_z, 0.0, M_pitch, 0.0])
             strip.push_wrench(wrench)
 
     def solve_body_forces(self, body):
-        
-        # Calculate Body Drag to prevent unrealistic infinite acceleration
+        """
+        Calculate body parasitic drag and rotational damping.
+        Drag: each axis computed independently to prevent cross-coupling.
+        Damping: aerodynamic resistance to body rotation (pitch/roll/yaw).
+        """
         vel = body.pull_airspeed
-        v_in_sq = vel[0]**2 + vel[1]**2 + vel[2]**2 + 1e-6
-        v_mag = np.sqrt(v_in_sq)
+        rates = body.pull_state[3:6]  # [p, q, r] angular rates
         
-        # Increased body drag area and coefficient to match 6 m/s trim speed
         Cd_body = 1.2
-        A_body = 0.10 # 0.10 m^2 frontal area
-        
-        q_dyn = 0.5 * self.rho * v_in_sq * A_body
-        
-        # Drag acts in the direction of the airflow (vel)
-        u_flow = vel / v_mag
-        F_drag_vec = -(q_dyn * Cd_body) * u_flow
+        A_frontal = 0.01  # m^2 frontal area (X direction)
+        A_top = 0.05      # m^2 planform area (Z direction)
         
         wrench = np.zeros(6)
-        wrench[:3] = F_drag_vec
+        
+        # Linear drag per axis
+        wrench[0] = 0.5 * self.rho * vel[0] * np.abs(vel[0]) * A_frontal * Cd_body
+        wrench[1] = 0.5 * self.rho * vel[1] * np.abs(vel[1]) * A_frontal * Cd_body
+        wrench[2] = 0.5 * self.rho * vel[2] * np.abs(vel[2]) * A_top * Cd_body
+        
+        # Aerodynamic rotational damping (body + tail resist rotation through air)
+        # C_damp approximates the torque from the tail and body at ~0.3m from COM
+        # M_damp = -C * omega * |omega|  (quadratic damping)
+        C_roll_damp = 0.005   # small roll damping
+        C_pitch_damp = 0.05   # strong pitch damping (tail is a large surface behind COM)
+        C_yaw_damp = 0.02     # moderate yaw damping
+        
+        wrench[3] = -C_roll_damp * rates[0] * np.abs(rates[0]) * self.rho
+        wrench[4] = -C_pitch_damp * rates[1] * np.abs(rates[1]) * self.rho
+        wrench[5] = -C_yaw_damp * rates[2] * np.abs(rates[2]) * self.rho
         
         body.push_wrench(wrench)
 
     def solve_tail_forces(self, tailcop):
         """
-        Calculates simple flat-plate aerodynamics for the tail control surface.
+        Calculates flat-plate aerodynamics for the tail.
+        Uses proper sinusoidal lift model valid at ALL angles (not just small alpha).
         """
         vel = tailcop.pull_airspeed
         
         v_in_sq = vel[0]**2 + vel[2]**2 + 1e-6
         alpha_mag = np.arctan2(np.abs(vel[2]), np.abs(vel[0]))
         
-        # Standard flat plate formulas
-        C_L = 2 * np.pi * alpha_mag
+        # Proper flat-plate coefficients valid at all AOA:
+        # C_L peaks at ~45° and goes to 0 at 0° and 90° (physically correct)
+        C_L = 1.2 * np.sin(2.0 * alpha_mag)
         C_D = 1.28 * np.sin(alpha_mag)**2 + 0.05
         
-        # Assume generic small tail area
-        dS = 0.05 
+        # Tail area from shape data
+        dS = 0.05  
         q_dyn = 0.5 * self.rho * v_in_sq * dS
         
-        # Convert to Normal (C_N) and Tangential (C_T) coefficients
+        # Normal and Tangential coefficients
         C_N = C_D * np.sin(alpha_mag) + C_L * np.cos(alpha_mag)
         C_T_friction = C_D * np.cos(alpha_mag)
-        C_T_suction = C_L * np.sin(alpha_mag)
-        
-        # Flat plates do not physically generate leading-edge suction
-        C_T_suction = 0.0
         
         F_z = C_N * q_dyn * np.sign(vel[2])
-        F_x = -(C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * q_dyn * 1.0)
+        F_x = C_T_friction * q_dyn * np.sign(vel[0])
         
         wrench = np.array([F_x, 0.0, F_z, 0.0, 0.0, 0.0])
         tailcop.push_wrench(wrench)

@@ -114,7 +114,7 @@ class Body_Frame(Base_Frame):
 
 # Frame: Winghinge
 class Winghinge_Frame(Base_Frame):
-    def __init__(self, side="left"):
+    def __init__(self, side="left", pitch_offset=0.0):
 
         # Call Parent's Init
         super().__init__()
@@ -125,8 +125,9 @@ class Winghinge_Frame(Base_Frame):
         self.side = side
         sign = 1 if side == "left" else -1
 
-        # Pose for Wing Hinge from Body COM
-        self.pose[:3] = np.array([0.18097, sign * 0.01345, 0.01557])
+        # Pose for Wing Hinge from Body COM (Moved X and Z to 0.0 to prevent tumbling)
+        self.pose[:3] = np.array([0.0, sign * 0.01345, 0.0])
+        self.pose[4] = pitch_offset
  
         # Vectors Definition
         # Flapping Vector = flapping angle(fa), flapping rate (fr)

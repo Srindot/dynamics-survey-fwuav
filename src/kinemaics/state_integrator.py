@@ -14,4 +14,6 @@ def integrator(current_vector, rate_of_change, dt):
       - Pose (using Velocity)
       - State (using Acceleration)
     """
+    import numpy as np
+    
     return current_vector + (rate_of_change * dt)

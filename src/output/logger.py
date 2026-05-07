@@ -3,19 +3,39 @@ import csv
 import numpy as np
 
 class SimulationLogger:
-    def __init__(self):
+    def __init__(self, num_strips=10):
         self.history = []
+        self.num_strips = num_strips
+        
+        # Base headers
         self.headers = [
             'time', 
-            'pos_x', 'pos_y', 'pos_z',
-            'roll', 'pitch', 'yaw',
-            'vel_x', 'vel_y', 'vel_z',
-            'p', 'q', 'r',
+            'body_pos_x', 'body_pos_y', 'body_pos_z',
+            'body_roll', 'body_pitch', 'body_yaw',
+            'body_vel_x', 'body_vel_y', 'body_vel_z',
+            'body_p', 'body_q', 'body_r',
             'flap_angle', 'flap_rate',
             'elevator', 'rudder',
-            'force_x', 'force_y', 'force_z',
-            'moment_x', 'moment_y', 'moment_z'
+            'body_force_x', 'body_force_y', 'body_force_z',
+            'body_moment_x', 'body_moment_y', 'body_moment_z'
         ]
+        
+        # Add headers for left wing strips
+        for i in range(num_strips):
+            self.headers.extend([
+                f'strip_l_{i}_alpha_geom',
+                f'strip_l_{i}_epsilon_ce',
+                f'strip_l_{i}_alpha_e',
+                f'strip_l_{i}_v_in_sq',
+                f'strip_l_{i}_F_tran_x',
+                f'strip_l_{i}_F_tran_z',
+                f'strip_l_{i}_F_rot_z',
+                f'strip_l_{i}_F_add_z',
+                f'strip_l_{i}_F_iner_z',
+                f'strip_l_{i}_F_tot_x',
+                f'strip_l_{i}_F_tot_z',
+                f'strip_l_{i}_M_pitch'
+            ])
 
     def log_step(self, t, sim):
         """
@@ -44,6 +64,24 @@ class SimulationLogger:
             wrench[3], wrench[4], wrench[5]
         ]
         
+        # Log Left Wing Strips Data (saved as custom attributes in aerodynamics.py)
+        for strip in sim.strips_l:
+            # We will pull these attributes safely if they exist
+            record.extend([
+                getattr(strip, 'alpha_geom', 0.0),
+                getattr(strip, 'epsilon_ce', 0.0),
+                getattr(strip, 'alpha_e', 0.0),
+                getattr(strip, 'v_in_sq', 0.0),
+                getattr(strip, 'F_tran_x', 0.0),
+                getattr(strip, 'F_tran_z', 0.0),
+                getattr(strip, 'F_rot_z', 0.0),
+                getattr(strip, 'F_add_z', 0.0),
+                getattr(strip, 'F_iner_z', 0.0),
+                getattr(strip, 'F_tot_x', 0.0),
+                getattr(strip, 'F_tot_z', 0.0),
+                getattr(strip, 'M_pitch', 0.0)
+            ])
+            
         self.history.append(record)
 
     def save_to_csv(self, filename="plot/simulation_data.csv"):

@@ -1,0 +1,252 @@
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:45: RuntimeWarning: invalid value encountered in cos
+  C =  np.cos(o)
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:46: RuntimeWarning: invalid value encountered in sin
+  S =  np.sin(o)
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:99: RuntimeWarning: invalid value encountered in sin
+  S =  np.sin(o/2)
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:102: RuntimeWarning: invalid value encountered in cos
+  qr = np.cos(o/2)
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:26: RuntimeWarning: overflow encountered in scalar power
+  v_in_sq = vel[0]**2 + vel[2]**2 + 1e-6
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:74: RuntimeWarning: invalid value encountered in scalar add
+  F_tran_x = -(C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * suction_efficiency * q_dyn * 1.0)
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:102: RuntimeWarning: invalid value encountered in scalar multiply
+  M_pitch = F_tot_z * strip.chordwise_cop
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:136: RuntimeWarning: overflow encountered in scalar power
+  v_in_sq = vel[0]**2 + vel[2]**2 + 1e-6
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:156: RuntimeWarning: invalid value encountered in scalar multiply
+  F_x = -(C_T_friction * q_dyn * np.sign(vel[0])) + (C_T_suction * q_dyn * 1.0)
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:112: RuntimeWarning: overflow encountered in scalar power
+  v_in_sq = vel[0]**2 + vel[1]**2 + vel[2]**2 + 1e-6
+/home/sriney/research/dynamics-survey/src/aerodynamics/aerodynamics.py:123: RuntimeWarning: invalid value encountered in multiply
+  F_drag_vec = (q_dyn * Cd_body) * u_flow
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1723: RuntimeWarning: invalid value encountered in multiply
+  multiply(a0, b2, out=tmp)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1722: RuntimeWarning: invalid value encountered in multiply
+  multiply(a2, b0, out=cp1)
+/home/sriney/research/dynamics-survey/src/kinemaics/quaternion_transform.py:76: RuntimeWarning: invalid value encountered in matmul
+  vector_new = R @ vec_in_hom
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1719: RuntimeWarning: invalid value encountered in multiply
+  multiply(a1, b2, out=cp0)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1719: RuntimeWarning: overflow encountered in multiply
+  multiply(a1, b2, out=cp0)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1720: RuntimeWarning: overflow encountered in multiply
+  tmp = array(a2 * b1)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1722: RuntimeWarning: overflow encountered in multiply
+  multiply(a2, b0, out=cp1)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1723: RuntimeWarning: overflow encountered in multiply
+  multiply(a0, b2, out=tmp)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1725: RuntimeWarning: overflow encountered in multiply
+  multiply(a0, b1, out=cp2)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1726: RuntimeWarning: overflow encountered in multiply
+  multiply(a1, b0, out=tmp)
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1727: RuntimeWarning: invalid value encountered in subtract
+  cp2 -= tmp
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1721: RuntimeWarning: invalid value encountered in subtract
+  cp0 -= tmp
+/home/sriney/research/dynamics-survey/.venv/lib/python3.10/site-packages/numpy/_core/numeric.py:1724: RuntimeWarning: invalid value encountered in subtract
+  cp1 -= tmp
+==== BIONIC FLAPPING WING UAV SIMULATOR ====
+Initializing Modular Simulator Loop...
+Time: 0.00s | Body Z Pos: 0.0000 | Body Z Vel: 0.0033
+Time: 0.01s | Body Z Pos: 0.0018 | Body Z Vel: 0.3631
+Time: 0.02s | Body Z Pos: 0.0075 | Body Z Vel: 0.7701
+Time: 0.03s | Body Z Pos: 0.0174 | Body Z Vel: 1.2069
+Time: 0.04s | Body Z Pos: 0.0317 | Body Z Vel: 1.6484
+Time: 0.05s | Body Z Pos: 0.0503 | Body Z Vel: 2.0657
+Time: 0.06s | Body Z Pos: 0.0728 | Body Z Vel: 2.4318
+Time: 0.07s | Body Z Pos: 0.0987 | Body Z Vel: 2.7256
+Time: 0.08s | Body Z Pos: 0.1271 | Body Z Vel: 2.9342
+Time: 0.09s | Body Z Pos: 0.1571 | Body Z Vel: 3.0527
+Time: 0.10s | Body Z Pos: 0.1879 | Body Z Vel: 3.0819
+Time: 0.11s | Body Z Pos: 0.2185 | Body Z Vel: 3.0265
+Time: 0.12s | Body Z Pos: 0.2481 | Body Z Vel: 2.8921
+Time: 0.13s | Body Z Pos: 0.2760 | Body Z Vel: 2.6820
+Time: 0.14s | Body Z Pos: 0.3014 | Body Z Vel: 2.3890
+Time: 0.15s | Body Z Pos: 0.3235 | Body Z Vel: 2.0126
+Time: 0.16s | Body Z Pos: 0.3413 | Body Z Vel: 1.5373
+Time: 0.17s | Body Z Pos: 0.3537 | Body Z Vel: 0.9231
+Time: 0.18s | Body Z Pos: 0.3590 | Body Z Vel: 0.0964
+Time: 0.19s | Body Z Pos: 0.3545 | Body Z Vel: -1.0647
+Time: 0.20s | Body Z Pos: 0.3358 | Body Z Vel: -2.7512
+Time: 0.21s | Body Z Pos: 0.2966 | Body Z Vel: -5.2193
+Time: 0.22s | Body Z Pos: 0.2280 | Body Z Vel: -8.5950
+Time: 0.23s | Body Z Pos: 0.1236 | Body Z Vel: -12.2023
+Time: 0.24s | Body Z Pos: -0.0138 | Body Z Vel: -14.9437
+Time: 0.25s | Body Z Pos: -0.1600 | Body Z Vel: -12.7613
+Time: 0.26s | Body Z Pos: -0.2098 | Body Z Vel: 6.5582
+Time: 0.27s | Body Z Pos: -0.0012 | Body Z Vel: 30.1115
+Time: 0.28s | Body Z Pos: 0.1815 | Body Z Vel: -5.2391
+Time: 0.29s | Body Z Pos: -0.1661 | Body Z Vel: -43.6917
+Time: 0.30s | Body Z Pos: -0.1119 | Body Z Vel: -159.6059
+Time: 0.31s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.32s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.33s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.34s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.35s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.36s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.37s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.38s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.39s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.40s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.41s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.42s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.43s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.44s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.45s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.46s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.47s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.48s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.49s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.50s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.51s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.52s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.53s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.54s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.55s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.56s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.57s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.58s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.59s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.60s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.61s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.62s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.63s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.64s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.65s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.66s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.67s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.68s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.69s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.70s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.71s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.72s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.73s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.74s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.75s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.76s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.77s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.78s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.79s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.80s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.81s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.82s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.83s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.84s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.85s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.86s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.87s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.88s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.89s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.90s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.91s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.92s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.93s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.94s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.95s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.96s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.97s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.98s | Body Z Pos: nan | Body Z Vel: nan
+Time: 0.99s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.00s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.01s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.02s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.03s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.04s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.05s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.06s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.07s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.08s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.09s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.10s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.11s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.12s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.13s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.14s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.15s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.16s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.17s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.18s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.19s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.20s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.21s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.22s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.23s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.24s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.25s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.26s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.27s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.28s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.29s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.30s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.31s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.32s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.33s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.34s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.35s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.36s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.37s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.38s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.39s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.40s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.41s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.42s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.43s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.44s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.45s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.46s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.47s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.48s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.49s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.50s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.51s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.52s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.53s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.54s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.55s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.56s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.57s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.58s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.59s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.60s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.61s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.62s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.63s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.64s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.65s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.66s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.67s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.68s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.69s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.70s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.71s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.72s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.73s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.74s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.75s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.76s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.77s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.78s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.79s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.80s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.81s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.82s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.83s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.84s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.85s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.86s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.87s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.88s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.89s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.90s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.91s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.92s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.93s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.94s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.95s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.96s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.97s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.98s | Body Z Pos: nan | Body Z Vel: nan
+Time: 1.99s | Body Z Pos: nan | Body Z Vel: nan
+Simulation Complete.
+Data successfully exported to plot/simulation_data.csv

@@ -10,7 +10,7 @@ if __name__ == "__main__":
     print("==== BIONIC FLAPPING WING UAV SIMULATOR ====")
     
     # Configure simulation parameters
-    DT = 0.001
+    DT = 0.0001
     TOTAL_TIME = 2.0  # seconds
     ITERATIONS = int(TOTAL_TIME / DT)
     
